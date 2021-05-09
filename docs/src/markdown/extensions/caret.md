@@ -1,5 +1,4 @@
-path: tree/master
-source: pymdownx/caret.py
+[:octicons-file-code-24:][_caret]{: .source-link }
 
 # Caret
 

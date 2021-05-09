@@ -1,5 +1,4 @@
-path: tree/master
-source: pymdownx/pathconverter.py
+[:octicons-file-code-24:][_pathconverter]{: .source-link }
 
 # PathConverter
 

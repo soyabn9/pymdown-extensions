@@ -1,5 +1,4 @@
-path: tree/master
-source: pymdownx/critic.py
+[:octicons-file-code-24:][_critic]{: .source-link }
 
 # Critic
 
@@ -31,7 +30,47 @@ by highlighting text and following it with a comment: `#!critic-markup {==highli
 !!! example "Critic Markup Accept Example"
 
     === "Output"
-        --8<-- "critic-accept-example.txt"
+        ```md-render
+        ---
+        extensions:
+        - pymdownx.critic
+        extension_configs:
+          pymdownx.critic:
+            mode: accept
+        ---
+        Here is some {--*incorrect*--} Markdown.  I am adding this{++ here++}.  Here is some more {--text
+        that I am removing--}text.  And here is even more {++text that I
+        am ++}adding.{~~
+
+        ~>  ~~}Paragraph was deleted and replaced with some spaces.{~~  ~>
+
+        ~~}Spaces were removed and a paragraph was added.
+
+        And here is a comment on {==some
+         text==}{>>This works quite well. I just wanted to comment on it.<<}. Substitutions {~~is~>are~~} great!
+
+        General block handling.
+
+        {--
+
+        * test remove
+        * test remove
+        * test remove
+            * test remove
+        * test remove
+
+        --}
+
+        {++
+
+        * test add
+        * test add
+        * test add
+            * test add
+        * test add
+
+        ++}
+        ```
 
     === "Markdown"
         ```critic-markup
@@ -74,7 +113,44 @@ When previewing, you can style them to stand out (see [CSS](#css) for more infor
 !!! example "Critic Markup Preview Example"
 
     === "Output"
-        --8<-- "critic-preview-example.txt"
+        ```md-render
+        ---
+        extensions:
+        - pymdownx.critic
+        ---
+        Here is some {--*incorrect*--} Markdown.  I am adding this{++ here++}.  Here is some more {--text
+        that I am removing--}text.  And here is even more {++text that I
+        am ++}adding.{~~
+
+        ~>  ~~}Paragraph was deleted and replaced with some spaces.{~~  ~>
+
+        ~~}Spaces were removed and a paragraph was added.
+
+        And here is a comment on {==some
+         text==}{>>This works quite well. I just wanted to comment on it.<<}. Substitutions {~~is~>are~~} great!
+
+        General block handling.
+
+        {--
+
+        * test remove
+        * test remove
+        * test remove
+            * test remove
+        * test remove
+
+        --}
+
+        {++
+
+        * test add
+        * test add
+        * test add
+            * test add
+        * test add
+
+        ++}
+        ```
 
     === "Markdown"
         ```critic-markup
@@ -157,7 +233,7 @@ Classes   | Description
 
 ??? settings "Basic CSS Setup"
 
-    ```css
+    ```{.css .md-max-height}
     /* Critic Markup */
     .markdown-body .critic {
       font-family: inherit;
@@ -277,6 +353,3 @@ Classes   | Description
 Option    | Type   | Default     | Description
 --------- |------- | ----------- | -----------
 `mode`    | string | `#!py3 view` | `view` just parses the markup and displays it in its HTML equivalent rendering. `accept` strips out the critic markup and replaces them with the suggested changes.  `reject` rejects all the suggestions and strips the critic markup out replacing it with the original.
-
-
---8<-- "links.txt"

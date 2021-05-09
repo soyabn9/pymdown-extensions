@@ -22,7 +22,6 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFT
 DEALINGS IN THE SOFTWARE.
 """
 from markdown import Extension
-from markdown import util as md_util
 from markdown.blockprocessors import BlockProcessor
 import xml.etree.ElementTree as etree
 import re
@@ -41,32 +40,120 @@ class TabbedProcessor(BlockProcessor):
 
         super().__init__(*args)
         self.tab_group_count = 0
+        self.current_sibling = None
+        self.content_indention = 0
+
+    def detab_by_length(self, text, length):
+        """Remove a tab from the front of each line of the given text."""
+
+        newtext = []
+        lines = text.split('\n')
+        for line in lines:
+            if line.startswith(' ' * length):
+                newtext.append(line[length:])
+            elif not line.strip():
+                newtext.append('')  # pragma: no cover
+            else:
+                break
+        return '\n'.join(newtext), '\n'.join(lines[len(newtext):])
+
+    def parse_content(self, parent, block):
+        """Get sibling tab.
+
+        Retrieve the appropriate sibling element. This can get tricky when
+        dealing with lists.
+
+        """
+
+        old_block = block
+        non_tabs = ''
+
+        # We already acquired the block via test
+        if self.current_sibling is not None:
+            sibling = self.current_sibling
+            block, non_tabs = self.detab_by_length(block, self.content_indent)
+            self.current_sibling = None
+            self.content_indent = 0
+            return sibling, block, non_tabs
+
+        sibling = self.lastChild(parent)
+
+        if sibling is None or sibling.tag.lower() != 'div' or sibling.attrib.get('class', '') != 'tabbed-set':
+            sibling = None
+        else:
+            # If the last child is a list and the content is indented sufficient
+            # to be under it, then the content's is sibling is in the list.
+            last_child = self.lastChild(sibling)
+            child_class = last_child.attrib.get('class', '') if last_child else ''
+            indent = 0
+            while last_child:
+                if (
+                    sibling and block.startswith(' ' * self.tab_length * 2) and
+                    last_child and (
+                        last_child.tag in ('ul', 'ol', 'dl') or
+                        (
+                            last_child.tag == 'div' and
+                            child_class in ('tabbed-content',)
+                        )
+                    )
+                ):
+
+                    # Handle nested tabbed content
+                    if last_child.tag == 'div' and child_class == 'tabbed-content':
+                        temp_child = self.lastChild(last_child)
+                        if temp_child.tag not in ('ul', 'ol', 'dl'):
+                            break
+                        last_child = temp_child
+                        child_class = last_child.attrib.get('class', '') if last_child else ''
+
+                    # The expectation is that we'll find an `<li>`.
+                    # We should get it's last child as well.
+                    sibling = self.lastChild(last_child)
+                    last_child = self.lastChild(sibling) if sibling else None
+                    child_class = last_child.attrib.get('class', '') if last_child else ''
+
+                    # Context has been lost at this point, so we must adjust the
+                    # text's indentation level so it will be evaluated correctly
+                    # under the list.
+                    block = block[self.tab_length:]
+                    indent += self.tab_length
+                else:
+                    last_child = None
+
+            if not block.startswith(' ' * self.tab_length):
+                sibling = None
+
+            if sibling is not None:
+                indent += self.tab_length
+                block, non_tabs = self.detab_by_length(old_block, indent)
+                self.current_sibling = sibling
+                self.content_indent = indent
+
+        return sibling, block, non_tabs
 
     def test(self, parent, block):
         """Test block."""
 
-        sibling = self.lastChild(parent)
-        return (
-            self.START.search(block) or
-            (
-                block.startswith(' ' * self.tab_length) and sibling is not None and
-                sibling.tag.lower() == 'div' and sibling.attrib.get('class', '') == 'tabbed-set'
-            )
-        )
+        if self.START.search(block):
+            return True
+        else:
+            return self.parse_content(parent, block)[0] is not None
 
     def run(self, parent, blocks):
         """Convert to tabbed block."""
 
-        sibling = self.lastChild(parent)
         block = blocks.pop(0)
-
         m = self.START.search(block)
-        if m:
-            # remove the first line
-            block = block[m.end():]
 
-        # Get the tabs block and the non-tab content
-        block, non_tabs = self.detab(block)
+        if m:
+            # removes the first line
+            if m.start() > 0:
+                self.parser.parseBlocks(parent, [block[:m.start()]])
+            block = block[m.end():]
+            sibling = self.lastChild(parent)
+            block, non_tabs = self.detab(block)
+        else:
+            sibling, block, non_tabs = self.parse_content(parent, block)
 
         if m:
             special = m.group(1) if m.group(1) else ''
@@ -113,7 +200,7 @@ class TabbedProcessor(BlockProcessor):
                     "for": "__tabbed_%d_%d" % (tab_set, tab_count)
                 }
             )
-            lab.text = md_util.AtomicString(title)
+            lab.text = title
 
             div = etree.SubElement(
                 sfences,
@@ -124,12 +211,24 @@ class TabbedProcessor(BlockProcessor):
             )
             sfences.attrib['data-tabs'] = '%d:%d' % (tab_set, tab_count)
         else:
-            div = self.lastChild(sibling)
+            if sibling.tag in ('li', 'dd') and sibling.text:
+                # Sibling is a list item, but we need to wrap it's content should be wrapped in <p>
+                text = sibling.text
+                sibling.text = ''
+                p = etree.SubElement(sibling, 'p')
+                p.text = text
+                div = sibling
+            elif sibling.tag == 'div' and sibling.attrib.get('class', '') == 'tabbed-set':
+                # Get `tabbed-content` under `tabbed-set`
+                div = self.lastChild(sibling)
+            else:
+                # Pass anything else as the parent
+                div = sibling
 
         self.parser.parseChunk(div, block)
 
         if non_tabs:
-            # Insert the non-details content back into blocks
+            # Insert the tabbed content back into blocks
             blocks.insert(0, non_tabs)
 
 

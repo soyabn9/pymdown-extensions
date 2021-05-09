@@ -1,4 +1,4 @@
-# FAQ
+# Frequently Asked Questions
 
 ## Function References in YAML
 
@@ -45,7 +45,7 @@ repository respectively. See [MagicLink](./extensions/magiclink.md) for more det
     see the related [FAQ question](#function-references-in-yaml) to see how to specify function references in YAML.
 
 ```py3
-import pymdownx
+from pymdownx import emoji
 
 extensions = [
     'markdown.extensions.tables',
@@ -54,10 +54,11 @@ extensions = [
     'pymdownx.tilde',
     'pymdownx.emoji',
     'pymdownx.tasklist',
-    'pymdownx.superfences'
+    'pymdownx.superfences',
+    'pymdownx.saneheaders'
 ]
 
-extension_config = {
+extension_configs = {
     "pymdownx.magiclink": {
         "repo_url_shortener": True,
         "repo_url_shorthand": True,
@@ -69,8 +70,8 @@ extension_config = {
         "subscript": False
     },
     "pymdownx.emoji": {
-        "emoji_index": pymdownx.emoji.gemoji,
-        "emoji_generator": pymdownx.emoji.to_png,
+        "emoji_index": emoji.gemoji,
+        "emoji_generator": emoji.to_png,
         "alt": "short",
         "options": {
             "attributes": {
@@ -85,4 +86,10 @@ extension_config = {
 }
 ```
 
---8<-- "refs.txt"
+## Mermaid Diagrams
+
+The short answer is to use [SuperFences' custom fence feature](./extensions/superfences.md#custom-fences). We provide
+a basic [example using SuperFences](./extensions/superfences.md#uml-diagram-example), but in order to get a really
+solid Mermaid experience, we actually go a bit further in our documents. While we don't often have time to answer
+everyone's questions regarding Mermaid, we have provided some fairly extensive notes on how we achieved Mermaid diagrams
+in this documents. Check out the notes [here](./extras/mermaid.md).

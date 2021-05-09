@@ -1,5 +1,4 @@
-path: tree/master
-source: pymdownx/superfences.py
+[:octicons-file-code-24:][_superfences]{: .source-link }
 
 # SuperFences
 
@@ -9,11 +8,10 @@ SuperFences provides a number of features:
 
 1. Allowing the [nesting of fences](#nested-fence-format) under blockquotes, lists, or other block elements (see
   [Limitations](#limitations) for more info).
-2. Create [tabbed fenced code blocks](#tabbed-fences).
-3. Ability to specify [custom fences](#custom-fences) to provide features like flowcharts, sequence diagrams, or other
+2. Ability to specify [custom fences](#custom-fences) to provide features like flowcharts, sequence diagrams, or other
   custom blocks.
-4. Allow disabling of indented code blocks in favor of only using the fenced variant (off by default).
-5. Experimental feature that preserves tabs within a code block instead of converting them to spaces which is Python
+3. Allow disabling of indented code blocks in favor of only using the fenced variant (off by default).
+4. Experimental feature that preserves tabs within a code block instead of converting them to spaces which is Python
   Markdown's default behavior.
 
 !!! danger "Reminder"
@@ -87,11 +85,12 @@ md = markdown.Markdown(extensions=['pymdownx.superfences'])
     Another paragraph.
     ````
 
-## Injecting Classes and IDs
+## Injecting Classes, IDs, and Attributes
 
-You can use the attribute list format to specify classes and IDs (IDs are only injectable in non-Pygments code blocks).
-The first provided class is always used as the language class. Arbitrary attributes in the form `key="value"` cannot
-be inserted as those are reserved for options such has `linenums` etc.
+You can use the brace format to specify classes and IDs (IDs are only injectable in non-Pygments code blocks).
+The first provided class is always used as the language class. IDs (`#id`) and arbitrary attributes in the form
+`key="value"` can be inserted as well, but only when Pygments isn't being used as Pygments does not support arbitrary
+attributes or IDs.
 
 !!! example "Injecting Classes"
 
@@ -127,161 +126,6 @@ the `#!html code` block.
 When using a built in [custom formatter](#custom-fences), all classes and IDs are injected on to the first element
 `#!html <div>` or `#!html <pre>`. This preserves previous behavior, but you can write your own and inject them in the
 way that suites your needs.
-
-## Tabbed Fences
-
-!!! warning "Deprecated 7.0"
-    The tab option is deprecated in 7.0 due to the addition of the general purpose tab extension
-    [`pymdownx.tabbed`](./tabbed.md).
-
-    The feature is still usable, but by the class names on the output
-    have changed from `superfences-tabs` and `superfences-content` to `tabbed-set` and `tabbed-content` respectively.
-    This is to help create unity between the new extension and this feature as we guide people towards the new
-    extension.
-
-    To use the legacy class names, you can use the global `legacy_tab_classes` option to get the old style classes. This
-    option will be removed, along with the entire `tab=""` feature in 8.0.
-
-SuperFences has the ability to create tabbed code blocks.  Simply add `tab="tab-title"` to the fence's header, and the
-code block will will be rendered in a tab with the title `tab-title`.  If you do not provide a title with either `tab=`
-or `tab=""`, but you've specified a language, the language will be used as the title. No case transformation is applied
--- what you type is what you get. Consecutive code tabs will be grouped together.
-
-!!! example "Tabbed Code"
-
-    === "Output"
-        ```Bash tab=
-        #!/bin/bash
-        STR="Hello World!"
-        echo $STR
-        ```
-
-        ```C tab=
-        #include 
-
-        int main(void) {
-          printf("hello, world\n");
-        }
-        ```
-
-        ```C++ tab=
-        #include <iostream>
-
-        int main() {
-          std::cout << "Hello, world!\n";
-          return 0;
-        }
-        ```
-
-        ```C# tab=
-        using System;
-
-        class Program {
-          static void Main(string[] args) {
-            Console.WriteLine("Hello, world!");
-          }
-        }
-        ```
-
-    === "Markdown"
-
-        ````
-        ```Bash tab=
-        #!/bin/bash
-        STR="Hello World!"
-        echo $STR
-        ```
-
-        ```C tab=
-        #include 
-
-        int main(void) {
-          printf("hello, world\n");
-        }
-        ```
-
-        ```C++ tab=
-        #include <iostream>
-
-        int main() {
-          std::cout << "Hello, world!\n";
-          return 0;
-        }
-        ```
-
-        ```C# tab=
-        using System;
-
-        class Program {
-          static void Main(string[] args) {
-            Console.WriteLine("Hello, world!");
-          }
-        }
-        ```
-        ````
-
-In order to use tabbed code blocks, some additional CSS is needed. You can check out the configuration below which will
-show the CSS and the HTML it targets. Keep in mind the CSS is just the minimum to get you started. You can tweak it and
-modify it to get it how you like it.
-
-??? settings "Tabbed Code Setup"
-    === "HTML"
-        ```HTML
-        <div class="tabbed-set">
-        <input name="__tabbed_1" type="radio" id="__tabbed_1_1" checked="checked">
-        <label for="__tabbed_1_1">Tab 0</label>
-        <div class="tabbed-content">...</div>
-        ...
-        <input name="__tabbed_1" type="radio" id="__tabbed_1_X" checked="checked">
-        <label for="__tabbed_1_X">Tab X</label>
-        <div class="tabbed-content">...</div>
-        ...
-        </div>
-        ```
-
-    === "CSS"
-        ```CSS
-        .tabbed-set {
-          display: flex;
-          position: relative;
-          flex-wrap: wrap;
-        }
-
-        .tabbed-set .highlight {
-          background: #ddd;
-        }
-
-        .tabbed-set .tabbed-content {
-          display: none;
-          order: 99;
-          width: 100%;
-        }
-
-        .tabbed-set label {
-          width: auto;
-          margin: 0 0.5em;
-          padding: 0.25em;
-          font-size: 120%;
-          cursor: pointer;
-        }
-
-        .tabbed-set input {
-          position: absolute;
-          opacity: 0;
-        }
-
-        .tabbed-set input:nth-child(n+1) {
-          color: #333333;
-        }
-
-        .tabbed-set input:nth-child(n+1):checked + label {
-            color: #FF5252;
-        }
-
-        .tabbed-set input:nth-child(n+1):checked + label + .tabbed-content {
-            display: block;
-        }
-        ```
 
 ## Preserve Tabs
 
@@ -361,13 +205,13 @@ control the starting line shown in the block.
 !!! example "Line Number Example"
 
     === "Output"
-        ``` linenums="1"
+        ``` {linenums="1"}
         import foo.bar
         ```
 
     === "Markdown"
         ````
-        ``` linenums="1"
+        ``` {linenums="1"}
         import foo.bar
         ```
         ````
@@ -383,7 +227,7 @@ So to set showing only every other line number, we could do the following. Line 
 !!! example "Nth Line Example"
 
     === "Output"
-        ``` linenums="2 2"
+        ``` {linenums="2 2"}
         """Some file."""
         import foo.bar
         import boo.baz
@@ -392,7 +236,7 @@ So to set showing only every other line number, we could do the following. Line 
 
     === "Markdown"
         ````
-        ``` linenums="2 2"
+        ``` {linenums="2 2"}
         """Some file."""
         import foo.bar
         import boo.baz
@@ -406,7 +250,7 @@ Special must be a value of n > 0.
 !!! example "Special Line Example"
 
     === "Output"
-        ``` linenums="1 1 2"
+        ``` {linenums="1 1 2"}
         """Some file."""
         import foo.bar
         import boo.baz
@@ -415,7 +259,7 @@ Special must be a value of n > 0.
 
     === "Markdown"
         ````
-        ``` linenums="1 1 2"
+        ``` {linenums="1 1 2"}
         """Some file."""
         import foo.bar
         import boo.baz
@@ -436,7 +280,7 @@ targeted line numbers separated by spaces.
 !!! example "Highlight Lines Example"
 
     === "Output"
-        ``` hl_lines="1 3"
+        ```{.py3 hl_lines="1 3"}
         """Some file."""
         import foo.bar
         import boo.baz
@@ -445,7 +289,7 @@ targeted line numbers separated by spaces.
 
     === "Markdown"
         ````
-        ``` hl_lines="1 3"
+        ```{.py3 hl_lines="1 3"}
         """Some file."""
         import foo.bar
         import boo.baz
@@ -458,7 +302,7 @@ Line numbers are always referenced starting at 1 ignoring what the line number i
 !!! example "Highlight Lines with Line Numbers Example"
 
     === "Output"
-        ``` hl_lines="1 3" linenums="2"
+        ```{.py3 hl_lines="1 3" linenums="2"}
         """Some file."""
         import foo.bar
         import boo.baz
@@ -467,81 +311,84 @@ Line numbers are always referenced starting at 1 ignoring what the line number i
 
     === "Markdown"
         ````
-        ```hl_lines="1 3" linenums="2"
+        ```{.py3 hl_lines="1 3" linenums="2"}
         """Some file."""
         import foo.bar
         import boo.baz
         import foo.bar.baz
+        ```
+        ````
+
+If you'd like to do a range of lines, you can use the notation `x-y` where `x` is the starting line and `y` is the
+ending line. You can do multiple ranges and even mix them with non ranges.
+
+!!! example "Highlight Ranges"
+
+    === "Output"
+        ```{.py3 hl_lines="1-2 5 7-8"}
+        import foo
+        import boo.baz
+        import foo.bar.baz
+
+        class Foo:
+           def __init__(self):
+               self.foo = None
+               self.bar = None
+               self.baz = None
+        ```
+
+    === "Markdown"
+        ````
+        ```{.py3 hl_lines="1-2 5 7-8"}
+        import foo
+        import boo.baz
+        import foo.bar.baz
+
+        class Foo:
+           def __init__(self):
+               self.foo = None
+               self.bar = None
+               self.baz = None
         ```
         ````
 
 ## Custom Fences
 
-SuperFences allows defining custom fences for special purposes, like flow charts and sequence diagrams:
+SuperFences allows defining custom fences for special purposes. For instance, we could create special fences for
+diagrams that we could later run Mermaid on.
 
 !!! example "Flow Chart Example"
 
     === "Output"
-        ```flow
-        st=>start: Start:>http://www.google.com[blank]
-        e=>end:>http://www.google.com
-        op1=>operation: My Operation
-        sub1=>subroutine: My Subroutine
-        cond=>condition: Yes
-        or No?:>http://www.google.com
-        io=>inputoutput: catch something...
-
-        st->op1->cond
-        cond(yes)->io->e
-        cond(no)->sub1(right)->op1
+        ```mermaid
+        graph TD
+            A[Hard] -->|Text| B(Round)
+            B --> C{Decision}
+            C -->|One| D[Result 1]
+            C -->|Two| E[Result 2]
         ```
 
     === "Markdown"
         ````
-        ```flow
-        st=>start: Start:>http://www.google.com[blank]
-        e=>end:>http://www.google.com
-        op1=>operation: My Operation
-        sub1=>subroutine: My Subroutine
-        cond=>condition: Yes
-        or No?:>http://www.google.com
-        io=>inputoutput: catch something...
-
-        st->op1->cond
-        cond(yes)->io->e
-        cond(no)->sub1(right)->op1
+        ```mermaid
+        graph TD
+            A[Hard] -->|Text| B(Round)
+            B --> C{Decision}
+            C -->|One| D[Result 1]
+            C -->|Two| E[Result 2]
         ```
         ````
 
-!!! example "Sequence Diagram Example"
+This would allow us access to all the diagrams Mermaid offers. Some Mermaid diagrams are less practical to use as they
+don't scale well, but many work great.
 
-    === "Output"
-        ```sequence
-        Title: Here is a title
-        A->B: Normal line
-        B-->C: Dashed line
-        C->>D: Open arrow
-        D-->>A: Dashed open arrow
-        ```
-
-    === "Markdown"
-        ````
-        ```sequence
-        Title: Here is a title
-        A->B: Normal line
-        B-->C: Dashed line
-        C->>D: Open arrow
-        D-->>A: Dashed open arrow
-        ```
-        ````
-
-As shown above, SuperFences defines two default custom fences (which can be removed if desired) called `flow` and
-`sequence`, for flowcharts and sequence diagrams respectively. The default custom fences simply preserve the content
-between the fences so a JavaScript UML library can convert the content and render the UML. To see *exactly* how to set
-up UML like in this documentation, see [UML Diagram Example](#uml-diagram-example).
+In the above example, we have set up a custom fence called `mermaid` which allows us to process special charts with
+[Mermaid][mermaid]. In this case, our special fence preserves the content and sends them to a an element so that
+[Mermaid][mermaid] can then find them and convert them when the document is loaded. To learn more see [UML Diagram
+Example](#uml-diagram-example).
 
 Custom fences are created via the `custom_fences` option.  `custom_fences` takes an array of dictionaries where each
-dictionary defines a custom fence. The dictionaries requires the following keys:
+dictionary defines a custom fence. The dictionaries require the following keys:
 
 Keys        | Description
 ----------- | -----------
@@ -549,6 +396,10 @@ Keys        | Description
 `class`     | The class name assigned to the HTML element when converting from Markdown to HTML.
 `format`    | A function that formats the HTML output. The function should return a string as HTML.
 `validator` | An optional parameter that is used to provide a function to validate custom fence parameters.
+
+!!! warning "Logging"
+    When a custom fence fails, the error will be swallowed up and the error will be handled gracefully. If logging is
+    desired, custom logging should be added into the custom function. SuperFences will not provide any.
 
 !!! new "New in 7.0"
     Starting in 7.0, you can override the base fence logic (the syntax highlighter) by specifying the custom fence
@@ -566,75 +417,87 @@ Format\ Function                | Description
 `superfences.fence_div_format`  | Places the HTML escaped content of the fence under a `#!html <div>` block.
 
 In general, formatters take five parameters: the source found between the fences, the specified language, the class name
-originally defined via the `class` option in the `custom_fence` entry, custom options, and the Markdown object (in case
+originally defined via the `class` option in the `custom_fence` entry, custom options, additional classes defined in
+brace style headers, an optional ID, any attributes defined in the brace style header, and the Markdown object (in case
 you want access to meta data etc.).
 
 ```py3
-def custom_formatter(source, language, css_class, options, md, classes=None, id_value='', **kwargs):
+def custom_formatter(source, language, css_class, options, md, classes=None, id_value='', attrs=None, **kwargs):
     return string
 ```
 
-!!! new "New 7.0"
-    The addition of the parameters `classes` and `id_value` is new in 7.0. If injecting additional classes or ids via
-    the [attribute list style](#injecting-classes-and-ids), only then will `classes` and `id_value` be passed in to
-    preserve backwards compatibility with old custom formatters. Users, moving forward, should at the very least update
-    their formatters with `**kwargs` to future proof their custom formatters in case additional parameters are added
-    in the future.
+or
+
+```py3
+def custom_formatter(source, language, css_class, options, md, **kwargs):
+    return string
+```
 
 All formatters should return a string as HTML.
 
-!!! tip
+!!! tip "YAML Configuration Format"
     If you are attempting to configure these options in a YAML based configuration (like in [MkDocs][mkdocs]), please
     see the [FAQ](../faq.md#function-references-in-yaml) to see how to specify function references in YAML.
 
+!!! new "New 7.0"
+    The addition of the parameters `classes` and `id_value` is new in 7.0. If injecting additional classes or ids via
+    [brace headers](#injecting-classes-and-ids), only then will `classes` and `id_value` be passed in to preserve
+    backwards compatibility with old custom formatters. Users, moving forward, should at the very least update their
+    formatters with `**kwargs` to future proof their custom formatters in case additional parameters are added in the
+    future.
+
+!!! new "Changes 8.0"
+    Formatters now take the keyword parameter `attrs`.
+
 ### Validators
 
-The `validator` is used to provide functions that accept or reject provided fence options. The validator is sent two
-parameters: the language defined in the fence, and a dictionary of options to validate.
+The `validator` is used to provide a function that allows the validation of inputs. Inputs are then sorted to either
+`attrs` or `options`. While a `formatter` can treat `attrs` and `options` however they like, the intention is that key
+value pairs assigned to `attrs` are assigned directly to the fenced block's element, while `options` are used to
+conditionally control logic within the formatter. If no validator is defined, the default is used which assigns all
+inputs to `attrs`.
 
-Custom options can be used as keys with quoted values (`key="value"`), or as keys with no value which are used more as a
-boolean (`key=`). SuperFences will parse the options in the fence and then pass them to the validator. If the validator
-returns true, the options will be accepted and later passed to the formatter.
+SuperFences will only pass `attrs` to a formatter if an attribute style header is used for a fenced block
+(` ``` {.lang attr="value"}`) and the `attr_list` extension is enabled. Attribute are not supported in the form
+(` ```lang attr=value`) and will cause the parsing of the fenced block to abort.
 
-This custom fence:
+Custom options can be used as keys with quoted values (`key="value"`), or as keys with no value (`key`). If a key is
+given with no value, the value will be the key value. SuperFences will parse the options in the fence and then pass them
+to the validator. If the validator returns true, the options will be accepted and later passed to the formatter. `attrs`
+will only be passed to the formatter if the `attr_list` extension is enabled. `attrs` will also be ignored during
+Pygments highlighting.
 
-````
-```custom_fence custom_option="value" other_custom_option=
-content
-```
-````
-
-Would yield this option dictionary:
-
-```py3
-{
-    "custom_option": "value",
-    "other_custom_option": True
-}
-```
+Assuming a validator fails, the next `validator`/`formatter` defined will be tried.
 
 For a contrived example: if we wanted to define a custom fence named `test` that accepts an option `opt` that can only
-be assigned a value of `A`, we would write the following validator:
+be assigned a value of `A`, we could define the validator below. Notice that if we get an input that matches `opt`, but
+doesn't validate with the appropriate value, we abort handling the fenced block for this `validator`/`formatter` by
+returning `False`. All other inputs are assigned as `attrs` which will be passed to the formatter if the `attr_list`
+extension is enabled.
 
 ```py3
-def custom_validator(language, options):
+def custom_validator(language, inputs, options, attrs, md):
     """Custom validator."""
 
     okay = True
-    for k in options.keys():
-        if k != 'opt':
-            okay = False
-            break
-    if okay:
-        if options['opt'] != "A":
-            okay = False
+    for k, v in inputs.items():
+        if k == 'opt':
+            if v != "A":
+                okay = False
+                break
+            else:
+                options[k] = v
+        else:
+            attrs[k] = v
+
     return okay
 ```
 
-Then later the formatter would be given the options:
+Assuming validation passed, the formatter would be given the option and any attributes (though the formatter below
+doesn't use the attributes).
 
 ```py3
-def custom_format(source, language, class_name, options, md):
+def custom_format(source, language, class_name, options, md, **kwargs):
     """Custom format."""
 
     return '<div class_name="%s %s", data-option="%s">%s</div>' % (language, class_name, options['opt'], html_escape(source))
@@ -643,202 +506,76 @@ def custom_format(source, language, class_name, options, md):
 This would allow us to use the following custom fence:
 
 ````
-```test opt="A"
+```{.test opt="A"}
 test
 ```
 ````
 
-!!! tip
+!!! tip "YAML Configuration Format"
     If you are attempting to configure these options in a YAML based configuration (like in [MkDocs][mkdocs]), please
     see the [FAQ](../faq.md#function-references-in-yaml) to see how to specify function references in YAML.
 
+!!! new "Changes 8.0"
+    - `validator` now accepts the following variables:
+        - `inputs`: with all the parsed options/attributes (validator should not modify this structure).
+        - `options`: a dictionary to which all valid options should be assigned to.
+        - `attrs`: a dictionary to which all valid attributes should be assigned to.
+        - `md`: the `Markdown` object.
+    - If the `attr_list` extension is enabled and the brace style header is used, any key/value pairs that were
+      assigned as attributes by the `validator` will be passed to the `formatter`'s `attrs` parameter.
+    - Options in the form of `key=` (which have no value) will are no longer be allowed. A `key` with no value will
+      assume the `value` to be the `key` name. This brings consistency as options are now parsed with `attr_list`.
+    - If a `validator` fails, the next `validator`/`formatter` pair will be tired.
+
 ### UML Diagram Example
 
-This example illustrates how this document uses the `custom_fences` option to do UML diagrams.  The settings below shows
-two new custom languages called `flow` and `sequence` and are the options that must be fed through the `custom_fences`
-[option](#options). The `flow` and `sequence` fences will pass the content through the `superfences.fence_code_format`
-format function which will wrap the content in `#!html <pre><code` blocks and attach the class `uml-flowchart` or
-`uml-sequence-diagram` to the respective `#!html <pre>` block. `superfences.fence_div_format` could just as easily be
-used to wrap the content in a `#!html <div>` instead, or a new custom function could have been written and used.
+!!! warning "Support"
+
+    This example is mainly used to illustrate how custom fences work. While Mermaid is used in the example, it is the
+    bare minimum needed to get diagrams working.
+
+    Please reference [Mermaid's][mermaid] documents for more information on configuring features. PyMdown Extensions
+    does not offer direct support for issues you may have in using [Mermaid][mermaid], feel free to use their issue
+    tracker to report problems with their library.
+
+    We do provide some [advanced notes on Mermaid](../extras/mermaid.md) if you are interested in learning how we use
+    and configure it in our own documentation.
+
+This example illustrates how you can use the `custom_fences` option to do UML diagrams with [Mermaid][mermaid]. The
+settings below show us creating a new custom fence called `mermaid`. The special fence is set under the `custom_fences`
+[option](#options).
+
+The `mermaid` fences will pass the content through the `superfences.fence_div_format` format function which will wrap
+the content in `#!html <div>` blocks and attach the class `mermaid` to the `#!html <div>` block.
 
 ```py3
 extension_configs = {
     "pymdownx.superfences": {
         "custom_fences": [
             {
-                'name': 'flow',
-                'class': 'uml-flowchart',
-                'format': pymdownx.superfences.fence_code_format
-            },
-            {
-                'name': 'sequence',
-                'class': 'uml-sequence-diagram',
-                'format': pymdownx.superfences.fence_code_format
+                'name': 'mermaid',
+                'class': 'mermaid',
+                'format': pymdownx.superfences.fence_div_format
             }
         ]
     }
 }
 ```
 
-As defined above, the custom UML diagrams are recognized when defining a fenced code block with either the language
-`flow` or `sequence`.  When they are converted, the HTML element containing this content will have the respective
-classes `uml-flowchart` or `uml-sequence-diagram`. The format function we used in this example only escapes the content
-to be included in HTML. We will rely on JavaScript libraries to render our flowcharts/diagrams in the browser.
-
-The JavaScript libraries used to render UML in this document are [flowchart.js][flowchart-js] and
-[sequence-diagram.js][sequence-diagram-js]. This extension does not provide these JavaScript libraries; you must provide
-the necessary JavaScript files for your custom fences yourself. If you wish to follow along with this example to enable
-UML, see the requirements below.
-
-flowcharts
-: 
-    - [raphael.js][raphael-js]
-    - [flowchart.js][flowchart-js]
-
-sequence diagrams
-: 
-    Minimum requirements for the latest version available via CDN (at the time of writing this).
-
-    - [raphael.js][raphael-js]
-    - [underscore.js][underscore-js]
-    - [sequence-diagram.js][sequence-diagram-js]
-
-All of the above mentioned libraries can be included using CDNs (you can use the version of your choice):
+The format function we used in this example only escapes the content to be included in HTML. We will rely on the
+[Mermaid][mermaid] JavaScript library to render our flowcharts/diagrams in the browser. [Mermaid][mermaid], on load,
+will automatically find the `#!html <div>` elements with the `mermaid` class and render them. We can include
+[Mermaid][mermaid] via its CDN.
 
 ```html
-<script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.2.7/raphael.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/js-sequence-diagrams/1.0.6/sequence-diagram-min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/flowchart/1.6.5/flowchart.min.js"></script>
-```
-
-Simply including the libraries above is not enough as these libraries need to be pointed at the elements they need to
-convert.  Also, we need to configure the libraries with the settings we would like.
-
-As mentioned earlier, our flowchart elements have the `uml-flowchart` class assigned to them, and the sequence diagram
-elements have the `uml-sequence-diagram` class assigned to them. Below shows an example script to convert the UML
-diagrams for both flowcharts and sequence diagrams using the listed libraries above. This script will target the
-elements with the classes `uml-flowchart` and `uml-sequence-diagram`. The script will pass the content to the correct
-library to render the content.  It will then insert the rendered UML and remove the original source. This is just an
-example, and you are not required to use the following script. You are free to modify the example script or write your
-own to suite your specific custom fence.
-
-In the below example we create an `onReady` function to execute the conversion when the HTML is loaded.  We create a
-`convertUML` function that takes the class name to search for, the converter to use, and a settings object to feed into
-the converter.  We then call `onReady` and feed it a callback function that will execute `convertUML` for flowcharts and
-for sequence diagrams. Notice that `convertUML` can handle both the `#!html <pre><code>` format or the `#!html <div>`
-format we mentioned earlier.
-
-The actual `convertUML` function reads UML instructions from our element and sticks it in a div that gets appended to
-our main HTML content (in this case we look for the the `body` tag, but it could be anything). We don't want to do it in
-place where our UML instructions are because it might be under an element that is hiding it with `display: none` (like a
-`details` tag); it won't render correctly if its parent is not displayed.  After we render the SVG, we insert it back
-where it belongs throwing away the original element that had the instructions.
-
-```js linenums="1"
-(function () {
-'use strict';
-
-/**
- * Targets special code or div blocks and converts them to UML.
- * @param {object} converter is the object that transforms the text to UML.
- * @param {string} className is the name of the class to target.
- * @param {object} settings is the settings for converter.
- * @return {void}
- */
-var uml = (function (converter, className, settings) {
-
-  var getFromCode = function getFromCode(parent) {
-    // Handles <pre><code>
-    var text = "";
-    for (var j = 0; j < parent.childNodes.length; j++) {
-      var subEl = parent.childNodes[j];
-      if (subEl.tagName.toLowerCase() === "code") {
-        for (var k = 0; k < subEl.childNodes.length; k++) {
-          var child = subEl.childNodes[k];
-          var whitespace = /^\s*$/;
-          if (child.nodeName === "#text" && !whitespace.test(child.nodeValue)) {
-            text = child.nodeValue;
-            break;
-          }
-        }
-      }
-    }
-    return text;
-  };
-
-  var getFromDiv = function getFromDiv(parent) {
-    // Handles <div>
-    return parent.textContent || parent.innerText;
-  };
-
-  // Change body to whatever element your main Markdown content lives.
-  var body = document.querySelectorAll("body");
-  var blocks = document.querySelectorAll("pre." + className + ",div." + className
-
-  // Is there a settings object?
-  );var config = settings === void 0 ? {} : settings;
-
-  // Find the UML source element and get the text
-  for (var i = 0; i < blocks.length; i++) {
-    var parentEl = blocks[i];
-    var el = document.createElement("div");
-    el.className = className;
-    el.style.visibility = "hidden";
-    el.style.position = "absolute";
-
-    var text = parentEl.tagName.toLowerCase() === "pre" ? getFromCode(parentEl) : getFromDiv(parentEl);
-
-    // Insert our new div at the end of our content to get general
-    // typeset and page sizes as our parent might be `display:none`
-    // keeping us from getting the right sizes for our SVG.
-    // Our new div will be hidden via "visibility" and take no space
-    // via `position: absolute`. When we are all done, use the
-    // original node as a reference to insert our SVG back
-    // into the proper place, and then make our SVG visible again.
-    // Lastly, clean up the old node.
-    body[0].appendChild(el);
-    var diagram = converter.parse(text);
-    diagram.drawSVG(el, config);
-    el.style.visibility = "visible";
-    el.style.position = "static";
-    parentEl.parentNode.insertBefore(el, parentEl);
-    parentEl.parentNode.removeChild(parentEl);
-  }
-});
-
-(function () {
-  var onReady = function onReady(fn) {
-    if (document.addEventListener) {
-      document.addEventListener("DOMContentLoaded", fn);
-    } else {
-      document.attachEvent("onreadystatechange", function () {
-        if (document.readyState === "interactive") {
-          fn();
-        }
-      });
-    }
-  };
-
-  onReady(function () {
-    if (typeof flowchart !== "undefined") {
-      uml(flowchart, "uml-flowchart");
-    }
-
-    if (typeof Diagram !== "undefined") {
-      uml(Diagram, "uml-sequence-diagram", { theme: "simple" });
-    }
-  });
-})();
-
-}());
+<script src="https://unpkg.com/mermaid@8.6.4/dist/mermaid.min.js"></script>
 ```
 
 ## Limitations
 
-This extension suffers from the same issues that the original fenced block extension suffers from.  Normally Python
-Markdown does not parse content inside HTML tags unless they are marked with the attribute `markdown='1'`.  But since
-this is run as a preprocessor, it is not aware of the HTML blocks.
+This extension suffers from some of the same quirks that the original fenced block extension suffers from.  Normally
+Python Markdown does not parse content inside HTML tags unless they are marked with the attribute `markdown='1'`.  But
+since this is run as a preprocessor, it is not aware of the HTML blocks.
 
 SuperFences is made to work with the default extensions out of the box.  It will probably not work with other extensions
 such as Grid Tables, since that extension allows for characters to obscure the blocks like the blockquote syntax does
@@ -870,7 +607,5 @@ Option                         | Type         | Default       | Description
 
     `highlight_code` is also disabled and now does nothing. If a non-highlighted variant of fences is preferred, it is
     recommend to use [custom fences](#custom-fences). This option will be removed in a future version.
-
---8<-- "links.txt"
 
 --8<-- "uml.txt"

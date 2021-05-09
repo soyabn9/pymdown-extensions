@@ -42,7 +42,7 @@ flake8
 
 ## Building and Editing Documents
 
-Documents are in Markdown (with with some additional syntax) and converted to HTML via Python Markdown and this
+Documents are in Markdown (with some additional syntax) and converted to HTML via Python Markdown and this
 extension bundle. If you would like to build and preview the documentation, you must have these packages installed:
 
 - @Python-Markdown/markdown: the Markdown parser.
@@ -285,5 +285,3 @@ Nothing is fool proof.  If they make a breaking change to the files that the scr
 change, the auto-update tool may need to be updated itself (hopefully this would be a rare occurrence).  If such a
 change does occur, and you are feeling brave, a pull request would be appreciated, but in time, they will be resolved
 regardless.
-
---8<-- "links.txt"

@@ -1,5 +1,4 @@
-path: tree/master
-source: pymdownx/progressbar.py
+[:octicons-file-code-24:][_progressbar]{: .source-link }
 
 # ProgressBar
 
@@ -97,7 +96,7 @@ Classes                  | Description
 
     You are able to style your progress bars as fancy or plain as you want.
 
-    ```css
+    ```{.css .md-max-height}
     .progress-label {
       position: absolute;
       text-align: center;

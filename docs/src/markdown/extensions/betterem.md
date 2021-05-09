@@ -1,5 +1,4 @@
-path: tree/master
-source: pymdownx/betterem.py
+[:octicons-file-code-24:][_betterem]{: .source-link }
 
 # BetterEm
 
@@ -148,5 +147,3 @@ BetterEm will allow non-smart emphasis to contain "floating" like tokens.
 Option         | Type   | Default             | Description
 -------------- | ------ | ------------------- | -----------
 `smart_enable` | string | `#!py3 'underscore'` | A string that specifies whether smart should be enabled for `all`, `asterisk`, `underscore`, or `none`.
-
---8<-- "abbr.txt"

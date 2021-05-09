@@ -1,9 +1,94 @@
 # Changelog
 
-## 7.0rc1
+## 8.2
 
-Please see [Release Notes](./release.md#upgrading-to-70) for details on upgrading to 7.0.
+- **NEW**: Snippets: now accepts a list of base paths which will be resolved in the order they are specified.
+  Compatibility is present with legacy behavior, and a single string path will still be accepted.
+- **NEW**: Snippets: allow for specifying certain snippets to auto-append to every file. Useful for appending
+  abbreviations, reference links, etc.
+- **NEW**: Snippets: a snippet base path can be a full path to a file. When a base path is a full path to a file, only
+  that file will be included from the specified folder. This allows for targeting a one off file outside of the normal
+  snippet paths(s).
+- **NEW**: MagicLink: add GitHub Discussions support to MagicLink. Can now use `?<num>` to link discussions. Full
+  discussion links will also be shortened if shortening is enabled. (#1187)
+- **NEW**: MagicLink: add new `normalize_issue_symbols` option to make issues, pull request, and discussion links all
+  render with `#` instead of `#`, `!`, and `?` respectively. Input syntax is still the same. Great if you want a GitHub
+  style look where all issue types are just rendered with `#`.
+- **FIX**: MagicLink: documentation will not render links with special icons added via CSS so as not to confuse users
+  that may think that is part of MagicLink. While possible with CSS, MagicLink provides no CSS automatically.
+- **FIX**: Tabbed &amp; Details: Fix corner case with lists. (#1225)
+- **FIX**: Fix issue with unescaping logic in code blocks.
 
+## 8.1.1
+
+- **FIX**: Ensure content immediately before Details content or Tabbed content gets preserved.
+- **FIX**: StripHTML: Fix some corner cases related to stripping comments.
+
+## 8.1
+
+- **NEW**: Drop support for Python 3.5.
+- **NEW**: Officially support Python 3.9.
+- **NEW**: Tabbed titles can now have simple Markdown in them which can be parsed and rendered (like emoji, bold, etc.).
+- **FIX**: Avoid parsing script tags in PathConverter and B64 extensions.
+
+## 8.0.1
+
+- **FIX**: Fix issue with `pymdownx-inline` an Pygments 2.7+.
+
+## 8.0
+
+Please see [Release Notes](./releases/8.0.md#8.0) for details on upgrading to 8.0.
+
+- **NEW**: Added SaneHeaders extension.
+- **NEW**: SuperFences \& InlineHilite: gracefully handle failing custom formatters and/or validators. Users should add
+  their own debug code to their formatter/validator if they suspect it isn't working.
+- **NEW**: SuperFences: if a custom fence validator fails, try the next custom fence until all are exhausted.
+- **NEW**: SuperFences: no longer allow custom options in the form `key=` (no value). Only keys with values or keys with
+  no value and no `=` are accepted. Keys with no value will now assume the value to be the key name.
+- **NEW**: SuperFences: if `attr_list` extension is enabled, fenced code that use brace attribute list style headers
+  (` ```{lang #id .class attr=value}`) will attach arbitrary attributes that are included in the header to the code
+  element.
+- **NEW**: SuperFences: when Pygments is disabled, options (such as `linenums`) included in fenced code headers no
+  longer do anything. If `attr_list` is enabled, and the brace header is used, such options will be treated as HTML
+  attributes. JavaScript highlighter options should be defined in the brace header form with `attr_list` enabled in
+  order to generate appropriate, compatible HTML with the chosen JavaScript highlighter.
+- **NEW**: SuperFences: backwards incompatible changes where made to custom fence API. See
+  [Release Notes](./releases/8.0.md#8.0) for instructions on how to migrate to the new API. Some temporary support for
+  most of the old format is in place, but is deprecated.
+- **NEW**: SuperFences: has removed legacy code tab feature. Associated `legacy_tab_classes` option has been removed.
+  Please use the Tabbed extension to create general purpose tabs for code blocks or other content.
+- **NEW**: Highlight: add new option `language_prefix` which controls the prefix applied to language classes when
+  Pygments is not being used.
+- **NEW**: Highlight: A new option called `code_attr_on_pre` was added to the Highlight extension and controls whether
+  language classes, and any ids, attributes, and classes that are defined in fenced code attribute list style headers,
+  are attached to the code element or pre element. This has effect when using Pygments.
+- **NEW**: Highlight: option `linenums` now defaults to `None` and accepts `None`, `True`, or `False`. `None` is
+  disabled by default, but can be enabled per code block. `True` enables line numbers globally. `False` disables
+  globally and cannot be enabled manually per code block.
+- **NEW**: ExtraRawHTML: remove extension.
+- **FIX**: Fix issues with complex emphasis combinations in BetterEm.
+- **FIX**: Details: fix corner cases related to extension and lists.
+- **FIX**: Tabbed: fix corner cases related to extension and lists.
+- **FIX**: EscapeAll: Handle HTML entities special.
+- **FIX**: SuperFences: Fix parameter unpacking bug.
+
+## 7.1
+
+- **NEW**: SuperFences will now allow number ranges in `hl_lines` option. (#878)
+- **NEW**: Emoji extension now requires custom emoji indexes to take an `options` and `md` argument. The old
+  non-argument format is deprecated and still accepted, but support for indexes with no arguments will be removed at a
+  future time.
+- **NEW**: Highlight now allows the specifying of a custom line number class when not using Pygments.
+- **FIX**: Better Arithmatex patterns. Fix issue #888 which caused a hang due to a regular expression typo. Also ensure
+  `#!tex $$..$$` and `#!tex begin{}...end{}` patterns properly don't match if the tail markers are escaped.
+
+## 7.0
+
+Please see [Release Notes](./releases/7.0.md#7.0) for details on upgrading to 7.0.
+
+- **NEW**: MagicLink will now shorten user name and repository links when link shortening is enabled.
+- **NEW**: Added MagicLink options `social_url_shortener` and `shortener_user_exclude` were added.
+- **NEW**: UML examples are now demonstrated with Mermaid in documentation.
 - **NEW**: SuperFences, if using the attribute list format (` ``` {.lang .additional_class, linenums="1"} `) allows
   adding additional classes. IDs can be added as well, though Pygments generated code blocks do not have a mechanism to
   actually insert IDs. The first provided class will always be treated as the language class.
@@ -84,7 +169,7 @@ Please see [Release Notes](./release.md#upgrading-to-70) for details on upgradin
 
 ## 6.0
 
-Please see [Release Notes](./release.md) for details on upgrading to 6.0.0.
+Please see [Release Notes](./releases/6.0.md#6.0) for details on upgrading to 6.0.0.
 
 - **NEW**: Allow custom inline highlight code blocks. (!380)
 - **NEW**: SuperFences now has one custom format convention which now also accepts the markdown class object to allow
@@ -268,7 +353,8 @@ Please see [Release Notes](./release.md) for details on upgrading to 6.0.0.
 ## 3.0
 
 - **NEW**: Added Keys extension.
-- **NEW**: Generalized custom fences (#60). `flow` and `sequence` fence are now just custom fences and can be disabled simply by overwriting the `custom_fences` setting.
+- **NEW**: Generalized custom fences (#60). `flow` and `sequence` fence are now just custom fences and can be disabled
+  simply by overwriting the `custom_fences` setting.
 - **NEW**: Remove deprecated `no_nl2br` in GitHub extension. (#24)
 - **NEW**: Remove deprecated HeaderAnchor extension. (#24)
 - **NEW**: Remove deprecated PyMdown extension. (#24)
@@ -306,7 +392,9 @@ Please see [Release Notes](./release.md) for details on upgrading to 6.0.0.
 
 - **NEW**: Arithmatex now supports `\(...\)`, `\[...\]`, and `\begin{}...\end{}`.
 - **NEW**: Arithmatex has an option to embed the math code in MathJax script tags.
-- **FIX**: Unfortunately the wrap option is now run through an HTML escaper and HTML tags can no longer be fed in this way.  Arithmatex also now wraps "wrapped" content with spans to containerize content and keep one equation from bleeding into the next.
+- **FIX**: Unfortunately the wrap option is now run through an HTML escaper and HTML tags can no longer be fed in this
+  way.  Arithmatex also now wraps "wrapped" content with spans to containerize content and keep one equation from
+  bleeding into the next.
 - **FIX**: Better handling of escaped Arithmatex inline tokens.
 - **FIX**: Better handling of escaped InlineHilite tokens.
 - **FIX**: Update InlineHilite and SuperFences so that the language option can accept things like `c#` and `.net` etc.
@@ -375,5 +463,3 @@ Please see [Release Notes](./release.md) for details on upgrading to 6.0.0.
 ## 1.0.0
 
 - **NEW**: Initial release.
-
---8<-- "refs.txt"

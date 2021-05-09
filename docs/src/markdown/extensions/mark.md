@@ -1,5 +1,4 @@
-path: tree/master
-source: pymdownx/mark.py
+[:octicons-file-code-24:][_mark]{: .source-link }
 
 # Mark
 

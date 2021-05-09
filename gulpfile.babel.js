@@ -8,7 +8,6 @@ import Promise from "promise"
 import yargs from "yargs"
 import gulp from "gulp"
 import sass from "gulp-sass"
-import uglify from "gulp-uglify"
 import postcss from "gulp-postcss"
 import autoprefixer from "autoprefixer"
 import cleanCSS from "gulp-clean-css"
@@ -16,9 +15,9 @@ import childProcess from "child_process"
 import gulpif from "gulp-if"
 import concat from "gulp-concat"
 import mqpacker from "css-mqpacker"
-import sourcemaps from "gulp-sourcemaps"
-import rollup from "gulp-rollup"
-import rollupBabel from "rollup-plugin-babel"
+import {terser} from "rollup-plugin-terser"
+import {rollup} from "rollup"
+import rollupBabel, {getBabelOutputPlugin} from "@rollup/plugin-babel"
 import stylelint from "gulp-stylelint"
 import eslint from "gulp-eslint"
 import rev from "gulp-rev"
@@ -26,7 +25,13 @@ import revReplace from "gulp-rev-replace"
 import vinylPaths from "vinyl-paths"
 import del from "del"
 import touch from "gulp-touch-fd"
-import sassInlineSVG from "sass-inline-svg-utf8"
+import path from "path"
+import inlineSvg from "postcss-inline-svg"
+import cssSvgo from "postcss-svgo"
+import replace from "gulp-replace"
+import outputManifest from "rollup-plugin-output-manifest"
+import sourcemaps from "gulp-sourcemaps"
+import {extendDefaultPlugins} from "svgo"
 
 /* Argument Flags */
 const args = yargs
@@ -48,8 +53,8 @@ let mkdocs = null
 const config = {
   files: {
     scss: "./docs/src/scss/**/*.scss",
-    css: "./docs/theme/assets/pymdownx-extras/*.css",
-    jsSrc: "./docs/src/js/*.js",
+    css: ["./docs/theme/assets/pymdownx-extras/*.css", "./docs/theme/assets/pymdownx-extras/*.css.map"],
+    jsSrc: "./docs/src/js/**/*.js",
     js: ["./docs/theme/assets/pymdownx-extras/*.js", "./docs/theme/assets/pymdownx-extras/*.js.map"],
     gulp: "gulpfile.babel.js",
     mkdocsSrc: "./docs/src/mkdocs.yml"
@@ -82,38 +87,103 @@ const config = {
   mkdocsCmd: args.mkdocs
 }
 
+const rollupjs = (sources, options) => {
+
+  const pluginModules = [rollupBabel({babelHelpers: "bundled"})]
+  if (options.minify) {
+    pluginModules.push(terser())
+  }
+  if (options.revision) {
+    pluginModules.push(outputManifest({fileName: "manifest-js.json", isMerge: options.merge}))
+  }
+
+  for (let i = 0; i < sources.length; i++) {
+    const src = sources[i]
+
+    rollup({
+      input: src,
+      plugins: pluginModules
+    }).then(bundle => {
+      bundle.write({
+        dir: options.dest,
+        format: "iife",
+        entryFileNames: (options.revision) ? "[name]-[hash].js" : "[name].js",
+        chunkFileNames: (options.revision) ? "[name]-[hash].js" : "[name].js",
+        sourcemap: options.sourcemap,
+        plugins: [
+          getBabelOutputPlugin({allowAllFormats: true, presets: ["@babel/preset-env"]})
+        ]
+      })
+    })
+  }
+
+  // Just return something so gulp knows we finished.
+  // We could return one of the `r`ollup` instances, since they are compatible,
+  // but we don't do anything whith them anyways.
+  return gulp.src(sources)
+}
+
 // ------------------------------
 // SASS/SCSS processing
 // ------------------------------
 gulp.task("scss:build:sass", () => {
-  const processors = [
-    autoprefixer,
-    mqpacker
+  const plugins = [
+    inlineSvg(
+      {
+        paths: [
+          "node_modules"
+        ],
+        encode: false
+      }
+    ),
+    cssSvgo(
+      {
+        plugins: extendDefaultPlugins([
+          {name: "removeDimensions"},
+          {name: "removeViewBox", active: false}
+        ]),
+        encode: false
+      }
+    ),
+    mqpacker,
+    autoprefixer
   ].filter(t => t)
 
-  return gulp.src(config.files.scss)
+  gulp.src(`${config.folders.theme}/manifest-css.json`, {allowEmpty: true})
+    .pipe(vinylPaths(del))
+
+  return gulp.src("./docs/src/scss/extra*.scss")
+    .pipe(sourcemaps.init())
     .pipe(sass({
-      functions: sassInlineSVG(),
       includePaths: [
         "node_modules/modularscale-sass/stylesheets",
         "node_modules/material-design-color",
         "node_modules/material-shadows"]
     }).on("error", sass.logError))
-    .pipe(postcss(processors))
+    .pipe(postcss(plugins))
     .pipe(gulpif(config.compress.enabled, cleanCSS()))
-    .pipe(concat("extra.css"))
+    .pipe(
+      vinylPaths(
+        filepath => {
+          return concat(path.basename(filepath, ".scss"))
+        }))
 
     // Revisioning
     .pipe(gulpif(config.revision, rev()))
+    .pipe(sourcemaps.write("."))
     .pipe(gulp.dest(config.folders.theme))
-    .pipe(gulpif(config.revision, rev.manifest("manifest.json", {base: config.folders.theme, merge: true})))
+    .pipe(
+      gulpif(
+        config.revision,
+        rev.manifest(`${config.folders.theme}/manifest-css.json`, {base: config.folders.theme, merge: true})
+      ))
     .pipe(gulpif(config.revision, gulp.dest(config.folders.theme)))
 })
 
 gulp.task("scss:build", gulp.series("scss:build:sass", () => {
   return gulp.src(config.files.mkdocsSrc)
     .pipe(gulpif(config.revision, revReplace({
-      manifest: gulp.src("manifest.json", {allowEmpty: true}),
+      manifest: gulp.src(`${config.folders.theme}/manifest*.json`, {allowEmpty: true}),
       replaceInExtensions: [".yml"]
     })))
     .pipe(gulp.dest("."))
@@ -138,49 +208,53 @@ gulp.task("scss:clean", () => {
     .pipe(vinylPaths(del))
 })
 
-// ------------------------------
-// JavaScript processing
-// ------------------------------
 gulp.task("js:build:rollup", () => {
-  return gulp.src(config.files.jsSrc)
-    .pipe(gulpif(config.sourcemaps, sourcemaps.init()))
-    .pipe(rollup({
-      "output": {
-        "name": "extra",
-        "format": "iife",
-        "globals": {
-          "flowchart": "flowchart",
-          "sequence-diagram": "Diagram"
-        }
-      },
-      "external": [
-        "flowchart",
-        "sequence-diagram"
-      ],
-      "plugins": [
-        rollupBabel({
-          "presets": [
-            ["@babel/preset-env", {"modules": false}]
-          ],
-          babelrc: false
-        })
-      ],
-      "input": `${config.folders.src}/js/extra.js`
-    }))
-    .pipe(gulpif(config.compress.enabled, uglify({compress: config.compress.jsOptions, warnings: false})))
-    .pipe(gulpif(config.sourcemaps, sourcemaps.write(config.folders.theme)))
+  gulp.src(`${config.folders.src}/manifest-js.json`, {allowEmpty: true})
+    .pipe(vinylPaths(del))
 
-    // Revisioning
-    .pipe(gulpif(config.revision, rev()))
-    .pipe(gulp.dest(config.folders.theme))
-    .pipe(gulpif(config.revision, rev.manifest("manifest.json", {base: config.folders.theme, merge: true})))
-    .pipe(gulpif(config.revision, gulp.dest(config.folders.theme)))
+  if (config.revision) {
+    rollupjs(
+      [`${config.folders.src}/js/extra-uml.js`],
+      {
+        dest: "docs/src/markdown/_snippets/.code",
+        minify: false,
+        revision: false,
+        sourcemap: false,
+        merge: false
+      }
+    )
+  }
+
+  return rollupjs(
+    [`${config.folders.src}/js/material-extra-theme.js`, `${config.folders.src}/js/extra-uml.js`],
+    {
+      dest: `${config.folders.theme}`,
+      minify: config.compress.enabled,
+      revision: config.revision,
+      sourcemap: config.sourcemaps,
+      merge: true
+    }
+  )
 })
 
-gulp.task("js:build", gulp.series("js:build:rollup", () => {
+gulp.task("html:build", () => {
+  return gulp.src("./docs/src/html/*")
+    .pipe(gulpif(config.revision, revReplace({
+      manifest: gulp.src(`${config.folders.theme}/manifest*.json`, {allowEmpty: true}),
+      replaceInExtensions: [".html"]
+    })))
+    .pipe(replace(/((?:\r?\n?\s*)<!--[\s\S]*?-->(?:\s*)(?=\r?\n)|<!--[\s\S]*?-->)/g, ""))
+    .pipe(gulp.dest("./docs/theme/partials"))
+})
+
+gulp.task("html:watch", () => {
+  gulp.watch("./docs/src/html/*", gulp.series("html:build", "mkdocs:update"))
+})
+
+gulp.task("js:build", gulp.series("js:build:rollup", "html:build", () => {
   return gulp.src(config.files.mkdocsSrc)
     .pipe(gulpif(config.revision, revReplace({
-      manifest: gulp.src("manifest.json", {allowEmpty: true}),
+      manifest: gulp.src(`${config.folders.theme}/manifest*.json`, {allowEmpty: true}),
       replaceInExtensions: [".yml"]
     })))
     .pipe(gulp.dest("."))
@@ -194,7 +268,7 @@ gulp.task("js:lint", () => {
 })
 
 gulp.task("js:watch", () => {
-  gulp.watch(config.files.jsSrc, gulp.series("js:build:rollup", "mkdocs:update"))
+  gulp.watch(config.files.jsSrc, gulp.series("js:build", "mkdocs:update"))
 })
 
 gulp.task("js:clean", () => {
@@ -263,6 +337,7 @@ gulp.task("serve", gulp.series(
   gulp.parallel(
     "scss:watch",
     "js:watch",
+    "html:watch",
     "mkdocs:watch",
     "mkdocs:serve"
   )

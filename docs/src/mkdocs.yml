@@ -4,27 +4,29 @@ repo_url: https://github.com/facelessuser/pymdown-extensions
 edit_uri: tree/master/docs/src/markdown
 site_description: A Collection of Useful Extensions for Python Markdown
 copyright: |
-  Copyright &copy; 2014 - 2020 <a href="https://github.com/facelessuser">Isaac Muse</a>
-  <br><span class="md-footer-custom-text">emoji provided free by </span>
-  <a href="https://github.com/twitter/twemoji">Twemoji</a>
+  Copyright &copy; 2014 - 2021 <a href="https://github.com/facelessuser"  target="_blank" rel="noopener">Isaac Muse</a>
 
 docs_dir: docs/src/markdown
 theme:
   name: material
   custom_dir: docs/theme
+  icon:
+    logo: material/book-open-page-variant
   palette:
-    primary: drac-purple
-    accent: drac-purple
+    scheme: dracula
+    primary: deep purple
+    accent: deep purple
   font:
     text: Roboto
     code: Roboto Mono
   features:
-    - tabs
+    - navigation.tabs
 
 nav:
-  - PyMdown Extensions: index.md
-  - Installation: installation.md
-  - Usage Notes: usage_notes.md
+  - Home:
+    - Pymdown Extensions: index.md
+    - Installation: installation.md
+    - Usage Notes: usage_notes.md
   - Extensions:
     - Arithmatex: extensions/arithmatex.md
     - B64: extensions/b64.md
@@ -35,28 +37,34 @@ nav:
     - Emoji: extensions/emoji.md
     - EscapeAll: extensions/escapeall.md
     - Extra: extensions/extra.md
-    - ExtraRawHTML: extensions/extrarawhtml.md
     - Highlight: extensions/highlight.md
     - InlineHilite: extensions/inlinehilite.md
     - Keys: extensions/keys.md
     - MagicLink: extensions/magiclink.md
     - Mark: extensions/mark.md
     - PathConverter: extensions/pathconverter.md
-    - StripHTML: extensions/striphtml.md
     - ProgressBar: extensions/progressbar.md
+    - SaneHeaders: extensions/saneheaders.md
     - SmartSymbols: extensions/smartsymbols.md
     - Snippets: extensions/snippets.md
+    - StripHTML: extensions/striphtml.md
     - SuperFences: extensions/superfences.md
     - Tabbed: extensions/tabbed.md
     - Tasklist: extensions/tasklist.md
     - Tilde: extensions/tilde.md
-  - Miscellaneous Extras: miscellaneous_extras.md
-  - FAQ: faq.md
+  - Extras:
+    - Slugs: extras/slugs.md
+    - Advanced Mermaid Notes: extras/mermaid.md
+  - FAQ:
+    - Frequently Asked Questions: faq.md
   - About:
     - Contributing &amp; Support: about/contributing.md
     - Development: about/development.md
     - Changelog: about/changelog.md
-    - Release Notes: about/release.md
+    - Release Notes:
+        - '6.0': about/releases/6.0.md
+        - '7.0': about/releases/7.0.md
+        - '8.0': about/releases/8.0.md
     - License: about/license.md
 
 markdown_extensions:
@@ -76,15 +84,15 @@ markdown_extensions:
   - pymdownx.superfences:
       preserve_tabs: true
       custom_fences:
-        - name: flow
-          class: uml-flowchart
-          format: !!python/name:pymdownx.superfences.fence_code_format
-        - name: sequence
-          class: uml-sequence-diagram
+        - name: mermaid
+          class: mermaid
           format: !!python/name:pymdownx.superfences.fence_code_format
         - name: math
           class: arithmatex
           format: !!python/name:pymdownx.arithmatex.fence_mathjax_format
+        - name: md-render
+          class: md-render
+          format: !!python/name:tools.pymdownx_md_render.md_sub_render
   - pymdownx.highlight:
       extend_pygments_lang:
         - name: php-inline
@@ -105,14 +113,16 @@ markdown_extensions:
       repo_url_shortener: true
       repo_url_shorthand: true
       social_url_shorthand: true
+      social_url_shortener: true
       user: facelessuser
       repo: pymdown-extensions
+      normalize_issue_symbols: true
   - pymdownx.tilde:
   - pymdownx.caret:
   - pymdownx.smartsymbols:
   - pymdownx.emoji:
-      emoji_index: !!python/name:pymdownx.emoji.twemoji
-      emoji_generator: !!python/name:pymdownx.emoji.to_svg
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
   - pymdownx.escapeall:
       hardbreak: True
       nbsp: True
@@ -123,23 +133,31 @@ markdown_extensions:
   - pymdownx.mark:
   - pymdownx.striphtml:
   - pymdownx.snippets:
-      base_path: docs/src/markdown/_snippets
+      base_path:
+      - docs/src/markdown/_snippets
+      - LICENSE.md
+      auto_append:
+      - refs.txt
+      check_paths: true
   - pymdownx.keys:
       separator: "\uff0b"
   - pymdownx.details:
   - pymdownx.tabbed:
+  - pymdownx.saneheaders:
 
 extra:
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/facelessuser
     - icon: fontawesome/brands/discord
-      link: https://discord.gg/fqQ7ypS
+      link: https://discord.gg/TWs8Tgr
 extra_css:
   - assets/pymdownx-extras/extra.css
 extra_javascript:
-  - assets/pymdownx-extras/extra.js
+  - assets/pymdownx-extras/extra-uml.js
 
 plugins:
   - search
   - git-revision-date-localized
+  - minify:
+      minify_html: true

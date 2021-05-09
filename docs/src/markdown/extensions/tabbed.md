@@ -1,5 +1,4 @@
-path: tree/master
-source: pymdownx/tabbed.py
+[:octicons-file-code-24:][_tabbed]{: .source-link }
 
 # Tabbed
 

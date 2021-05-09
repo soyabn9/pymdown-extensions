@@ -1,5 +1,4 @@
-path: tree/master
-source: pymdownx/arithmatex.py
+[:octicons-file-code-24:][_arithmatex]{: .source-link }
 
 # Arithmatex
 
@@ -289,7 +288,7 @@ extensions = [
 extension_config = {
     "pymdownx.inlinehilite": {
         "custom_inline": [
-            {"name": "math", "class": "arithmatex", arithmatex.inline_mathjax_format}
+            {"name": "math", "class": "arithmatex", "format": arithmatex.inline_mathjax_format}
         ]
     }
 }
@@ -313,13 +312,13 @@ can create math fences:
 import pymdownx.arithmatex as arithmatex
 
 extensions = [
-    "pymdownx.inlinehilite"
+    "pymdownx.superfences"
 ]
 
 extension_config = {
     "pymdownx.superfences": {
         "custom_fences": [
-            {"name": "math", "class": "arithmatex", arithmatex.inline_mathjax_format}
+            {"name": "math", "class": "arithmatex", arithmatex.fence_mathjax_format}
         ]
     }
 }
@@ -368,8 +367,4 @@ Option            | Type     | Default                               | Descripti
 `smart_dollar`    | bool     | `#!py3 True`                          | Enable Arithmatex's smart dollar logic to minimize math detection issues with `#!tex $`.
 `preview`         | bool     | `#!py3 True`                          | Insert a preview to show until MathJax finishes loading the equations.
 
----8<---
-links.txt
-
-mathjax.txt
----8<---
+---8<--- "mathjax.txt"
